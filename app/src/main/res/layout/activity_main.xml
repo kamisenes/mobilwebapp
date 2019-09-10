@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:id="@+id/login"
+    android:gravity="center"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:paddingBottom="16dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="16dp"
+    android:weightSum="1">
+
+
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="100dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="40dp"
+        android:layout_marginTop="5dp"
+        android:padding="0dp"
+        android:src="@drawable/tosyali_dikey"/>
+    <Spinner
+        android:layout_width="match_parent"
+        android:id="@+id/spin_url"
+        android:layout_height="45dp">
+
+    </Spinner>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/edturl"
+        android:layout_marginTop="10dp"
+        android:background="@android:color/transparent"
+        android:drawableLeft="@drawable/world"
+        android:drawablePadding="16dp"
+        android:ems="10"
+        android:hint="URL Giriniz // tosyaliholding.com.tr"
+        android:paddingLeft="10dp"
+        android:textColorHint="@color/gray"
+        android:textSize="16sp"
+        android:layout_weight="0.03" />
+
+
+
+
+
+
+    <Button
+        android:layout_width="match_parent"
+        android:id="@+id/btngiris"
+        android:layout_height="70dp"
+        android:layout_marginTop="40dp"
+        android:background="@drawable/rectangle_3"
+        android:clickable="true"
+        android:padding="16dp"
+        android:text="Giriş"
+        android:textAllCaps="true"
+        android:textColor="#fff"
+        android:textSize="18sp" />
+
+
+</LinearLayout>
