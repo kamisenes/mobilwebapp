@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -29,6 +31,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -50,6 +53,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static com.unfollowerapp.mobilweb.MainActivity.android_id;
 
@@ -62,19 +66,22 @@ public class webview_Act extends AppCompatActivity
     public static final String MY_PREFS_NAME = "MyPrefsFile";
       List<String> category;
     private FirebaseDatabase mFirebaseDatabase;
-    static List<String> tumveriler;
     String url_data;
-
+    FirebaseDatabase database;
+    public String keyval;
+    private static List<String> id;
+    private static List<String> urls;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_webview_);
         FirebaseApp.initializeApp(this);
         mFirebaseDatabase = FirebaseDatabase.getInstance();
-        tumveriler=new ArrayList<>();
+         database = FirebaseDatabase.getInstance();
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        urls=new ArrayList<>();
+        id=new ArrayList<>();
         FloatingActionButton fab = findViewById(R.id.fab);
         // Change the ActionBar title text
                 /*
@@ -188,30 +195,59 @@ public class webview_Act extends AppCompatActivity
 
     private void urlSil() {
 
+
+        final List<String> universityList = new ArrayList<>();
+
         LayoutInflater li = LayoutInflater.from(webview_Act.this);
         View promptsView = li.inflate(R.layout.popupurlsil, null);
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
                 webview_Act.this);
         alertDialogBuilder.setView(promptsView);
         final Spinner spinner=(Spinner) promptsView.findViewById(R.id.spinurlsil);
         final Button sil=(Button) promptsView.findViewById(R.id.btnurlsil);
         spinner.setOnItemSelectedListener(webview_Act.this);
-         List<String> url_listi=new ArrayList<>();
-         url_listi.clear();
-         url_listi=verigetir();
+        DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference(android_id);
+        rootRef.child("posts").addValueEventListener(new ValueEventListener() {
+                                                         @Override
+                                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                             Map<String, Object> map = (Map<String, Object>) dataSnapshot.getValue();
+                                                             Log.d("keys", "Value is: " + map);
 
-            if (url_listi.size()>0){
-                ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(webview_Act.this, android.R.layout.simple_spinner_item, url_listi);
-                dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                // attaching data adapter to spinner
-                spinner.setAdapter(dataAdapter);
-            }
+
+                                                             if (map!=null){
+                                                                 for (Object value : map.values()) {
+                                                                     universityList.add(value.toString());
+                                                                     urls.add(value.toString());
+                                                                 }
+
+                                                                 for (String key : map.keySet()) {
+                                                                     id.add(key);
+                                                                 }
+
+                                                                 ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(webview_Act.this, android.R.layout.simple_spinner_item, universityList);
+                                                                 dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                                                 // attaching data adapter to spinner
+                                                                 spinner.setAdapter(dataAdapter);
+
+
+                                                             }
+
+
+                                                         }
+
+                                                         @Override
+                                                         public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                         }
+
+
+                                                     });
 
 
         sil.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                verisil(spinner.getSelectedItem().toString());
+                deleteURL(spinner.getSelectedItem().toString());
 
 
             }
@@ -241,13 +277,12 @@ public class webview_Act extends AppCompatActivity
     }
 
     private void veriekle(String str){
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
+
         DatabaseReference myRef = database.getReference(android_id);
+        String key = myRef.child("URL_GET").push().getKey();
 
-
-        List<String> data=verigetir() ;
-        data.add(str);
-        myRef.setValue(data);
+//then you can write in that node in this way
+        myRef.child("posts").child(key).setValue(str);
     }
     private void verisil(String str){
         String silenecekveri=str;
@@ -275,7 +310,6 @@ public class webview_Act extends AppCompatActivity
                     String val = postSnapshot.getValue(String.class);
                     Log.d("veriekleme23",val);
                     universityList.add(val);
-                    tumveriler.add(val);
 
 
                 }
@@ -445,6 +479,57 @@ public class webview_Act extends AppCompatActivity
 
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
+
+    }
+
+
+
+    private void deleteURL(String silinecekitem){
+
+
+        if (silinecekitem.length()>0 && silinecekitem!=null){
+
+
+            for (int i =0;i<id.size();i++){
+                if (urls.get(i).equals(silinecekitem)){
+                    keyval=id.get(i);
+                    Log.d("asdas",keyval);
+                    delURL();
+                }
+            }
+        }
+
+
+
+
+
+
+       /* FirebaseDatabase.getInstance().getReference(android_id).child("posts").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                if (dataSnapshot != null && dataSnapshot.getValue() != null) {
+
+
+                    //  for (DataSnapshot child : dataSnapshot.getChildren()) {
+                    // if we want to get do operation in multiple data then write your code here
+                    //  }
+                    keyval = dataSnapshot.getKey();
+                    delURL();
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                //add code in case you not get proper dat from firebase
+            }
+        });*/
+    }
+    private void delURL(){
+        FirebaseDatabase.getInstance().getReference(android_id).child("posts").child(keyval).removeValue();
+
+        urlSil();
 
     }
 }

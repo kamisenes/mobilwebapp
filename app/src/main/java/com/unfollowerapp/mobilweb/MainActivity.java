@@ -29,6 +29,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     Button btngiris;
@@ -88,14 +89,16 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         final List<String> universityList = new ArrayList<>();
 
 
-        DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference(android_id);
-        rootRef.addValueEventListener(new ValueEventListener() {
+       DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference(android_id);
+
+      /*  rootRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
 
                     int deger = Integer.parseInt(postSnapshot.getKey());
                     String val = postSnapshot.getValue(String.class);
+                    Log.d("keys",val + " _"+deger);
                     universityList.add(val);
 
 
@@ -115,7 +118,47 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 Log.d("firebasevalues", databaseError.toException() + "..");
 
             }
+        });*/
+
+       rootRef.child("posts").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Map<String, Object> map = (Map<String, Object>) dataSnapshot.getValue();
+                Log.d("keys", "Value is: " + map);
+
+
+                if (map!=null) {
+                    for (Object value : map.values()) {
+                        universityList.add(value.toString());
+                    }
+
+
+                    ArrayAdapter<String>dataAdapter= new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, universityList);
+                    dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    // attaching data adapter to spinner
+                    spin.setAdapter(dataAdapter);
+                }
+
+
+
+
+
+
+            }
+
+
+
+
+
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
         });
+
+
+
         }
 
 
@@ -133,15 +176,5 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     }
 
-    private void addArtist() {
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        List<String> data = new ArrayList<>();
-        for (int i = 0; i <10; i++){
-            data.add(i, "denemedata");
 
-        }
-        DatabaseReference myRef = database.getReference(android_id);
-        myRef.setValue(data);
-
-    }
 }
